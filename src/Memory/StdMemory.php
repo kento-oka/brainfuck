@@ -21,7 +21,7 @@ class StdMemory extends AbstractMemory{
     /**
      * メモリのデータの最大値
      */
-    protected const DEFAULT_MEMORY_DATA_MAX = 0xff;
+    protected const DEFAULT_MEMORY_DATA_MAX = PHP_INT_MAX;
 
     /**
      * メモリのポインタの最大値(メモリの容量)
@@ -69,7 +69,7 @@ class StdMemory extends AbstractMemory{
      * {@inheritDoc}
      */
     public function getData(int $pointer): int{
-        if(self::DEFAULT_MEMORY_POINTER_MAX > $pointer || $this->pointerMax < $pointer){
+        if(0 > $pointer || $this->pointerMax < $pointer){
             throw new \RuntimeException();
         }
 
@@ -80,7 +80,7 @@ class StdMemory extends AbstractMemory{
      * {@inheritDoc}
      */
     public function setData(int $pointer, int $data): MemoryInterface{
-        if(self::DEFAULT_MEMORY_POINTER_MAX > $pointer || $this->pointerMax < $pointer){
+        if(0 > $pointer || $this->pointerMax < $pointer){
             throw new \RuntimeException();
         }
 
@@ -88,14 +88,14 @@ class StdMemory extends AbstractMemory{
             throw new \RuntimeException();
         }
 
-        if(0 !== $data){
-            $this->memory[$pointer] = $data;
-        }
+        $this->memory[$pointer] = $data;
 
         return $this;
     }
 
     public function clear(): MemoryInterface{
         $this->memory   = [];
+
+        return $this;
     }
 }

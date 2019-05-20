@@ -91,8 +91,8 @@ class Interpreter{
         $jumpStack  = new \SplStack();
 
         while(!$program->eof()){
-            $programPointer = $program->tell();
             $token          = self::TOKEN_MAP[$program->read(1)] ?? null;
+            $programPointer = $program->tell();
 
             if(null === $token){
                 continue;
@@ -131,7 +131,7 @@ class Interpreter{
                 case Token::T_INPUT:
                     $inByte =  $input->read(1);
 
-                    if("" === $input){
+                    if("" === $inByte){
                         throw new \RuntimeException();
                     }
 
@@ -141,7 +141,7 @@ class Interpreter{
                 case Token::T_JUMP:
                     $jumpStack->push($programPointer);
 
-                    if(false !== $jumpStack){
+                    if(false !== $skipToBack){
                         break;
                     }
 
@@ -158,17 +158,21 @@ class Interpreter{
 
                     $backPoint = $jumpStack->pop();
 
-                    if(false !== $jumpStack){
-                        if($backPoint === $jumpStack){
-                            $jumpStack = false;
+                    if(false !== $skipToBack){
+                        if($backPoint === $skipToBack){
+                            $skipToBack = false;
                         }
 
                         break;
                     }
 
-                    if(0 !== $this->memory->getData($this->dataPointer)){
-                        $program->seek($backPoint);
+                    if(0 === $this->memory->getData($this->dataPointer)){
+                        break;
                     }
+
+                    $jumpStack->push($backPoint);
+                    $program->seek($backPoint);
+
                     break;
             }
         }
